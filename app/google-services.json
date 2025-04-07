@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "897719216330",
+    "project_id": "ingatlan-64541",
+    "storage_bucket": "ingatlan-64541.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:897719216330:android:8551841d5a6cec622f6c33",
+        "android_client_info": {
+          "package_name": "com.example.ingatlan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "897719216330-dpapqp636jmknm2a29u1bpmdrjreqq81.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVk8cyDkl-sp9G9jhw3A7bVh_2iLAM_Ec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "897719216330-dpapqp636jmknm2a29u1bpmdrjreqq81.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

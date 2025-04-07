@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#331313"
+    tools:context=".SignUpActivity">
+
+    <TextView
+        android:id="@+id/registerText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="-3dp"
+        android:textColor="@color/white"
+        android:text="@string/register"
+        android:textAlignment="center"
+        android:textSize="35sp" />
+
+    <EditText
+        android:id="@+id/email"
+        android:inputType="textEmailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/registerText"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="25dp"
+        android:ems="10"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:hint="@string/email_c_m"
+        android:minHeight="48dp"
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/email"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:hint="@string/password"
+        android:inputType="textPassword"
+        android:minHeight="48dp"
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/password_conf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/password"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:hint="@string/jelsz_jra"
+        android:inputType="textPassword"
+        android:minHeight="48dp"
+        android:textAlignment="center" />
+
+    <Button
+        android:id="@+id/register"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/password_conf"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="100dp"
+        android:backgroundTint="#050000"
+        android:text="@string/register"
+        android:onClick="register"
+        />
+
+    <Button
+        android:id="@+id/cancel"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/password_conf"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="100dp"
+        android:layout_alignEnd="@id/password"
+        android:backgroundTint="#050000"
+        android:onClick="cancel"
+        android:text="@string/m_gse"
+        />
+
+</RelativeLayout>

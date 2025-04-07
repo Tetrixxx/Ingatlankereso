@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Ingatlan</string>
+    <string name="username">Felhasználónév</string>
+    <string name="password">Jelszó</string>
+    <string name="login">Bejelentkezés</string>
+    <string name="register">Regisztráció</string>
+    <string name="email_c_m">Email cím</string>
+    <string name="m_gse">Mégse</string>
+    <string name="jelsz_jra">Jelszó újra</string>
+</resources>
