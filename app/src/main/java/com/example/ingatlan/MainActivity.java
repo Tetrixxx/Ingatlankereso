@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i(LOG_TAG, "onCreate");
     }
 
-    // TODO location 2.video
 
 
     public void loginAsGuest(View view) {
