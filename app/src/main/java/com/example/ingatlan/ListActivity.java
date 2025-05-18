@@ -163,6 +163,9 @@ public class ListActivity extends AppCompatActivity {
         super.onStop();
         if(adapter != null){
             adapter.stopListening();   // Megállítja a snapshot figyelést, így erőforrásokat takarít meg
+            adapter = new PropertyAdapter(currentOptions);
+            recyclerView.setAdapter(adapter);
+            adapter.startListening();
         }
     }
 

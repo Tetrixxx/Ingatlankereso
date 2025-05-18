@@ -1,10 +1,10 @@
 package com.example.ingatlan;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,16 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.firestore.DocumentSnapshot;
 
-public class PropertyAdapter extends FirestoreRecyclerAdapter<Property, PropertyAdapter.PropertyHolder> {
+public class PropertyAdapter extends FirestoreRecyclerAdapter<Property, PropertyAdapter.PropertyViewHolder> {
 
     public PropertyAdapter(@NonNull FirestoreRecyclerOptions<Property> options) {
         super(options);
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull PropertyHolder holder, int position, @NonNull Property model) {
+    protected void onBindViewHolder(@NonNull PropertyViewHolder holder, int position, @NonNull Property model) {
         // Alapértelmezett értékek beállítása
         holder.textTitle.setText(model.getTitle());
         holder.textAddress.setText(model.getAddress());
@@ -34,20 +33,29 @@ public class PropertyAdapter extends FirestoreRecyclerAdapter<Property, Property
         holder.textPrice.setContentDescription("Ár: " + model.getPrice() + " Ft");
         holder.textCity.setContentDescription("Város: " + model.getCity());
         holder.textType.setContentDescription("Típus: " + model.getType());
+        holder.textAddress.setContentDescription("Cím: " + model.getAddress());
+
+        holder.itemView.setOnClickListener(v -> {
+            Context context = v.getContext();
+            Intent intent = new Intent(context, PropertyDetailActivity.class);
+            // Feltételezzük, hogy a Property osztályod implementálja a Parcelable interfészt!
+            intent.putExtra("PROPERTY", model);
+            context.startActivity(intent);
+        });
+
+
     }
 
     @NonNull
     @Override
-    public PropertyHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // a list_item.xml layout inflatálása
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
-        return new PropertyHolder(view);
-
-
+    public PropertyViewHolder onCreateViewHolder(@NonNull ViewGroup group, int i) {
+        View view = LayoutInflater.from(group.getContext())
+                .inflate(R.layout.list_item, group, false);
+        return new PropertyViewHolder(view);
     }
 
-    // A ViewHolder osztály, amely a list_item.xml-ben definiált nézeteket fogja összekötni
-    class PropertyHolder extends RecyclerView.ViewHolder {
+
+    public static class PropertyViewHolder extends RecyclerView.ViewHolder {
         TextView textTitle;
         TextView textAddress;
         TextView textPrice;
@@ -55,7 +63,7 @@ public class PropertyAdapter extends FirestoreRecyclerAdapter<Property, Property
 
         TextView textCity;
 
-        public PropertyHolder(@NonNull View itemView) {
+        public PropertyViewHolder(@NonNull View itemView) {
             super(itemView);
             textTitle = itemView.findViewById(R.id.textViewTitle);
             textAddress = itemView.findViewById(R.id.textViewAddress);
@@ -64,5 +72,4 @@ public class PropertyAdapter extends FirestoreRecyclerAdapter<Property, Property
             textCity = itemView.findViewById(R.id.textViewCity);
         }
     }
-
 }
