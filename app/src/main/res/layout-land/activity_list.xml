@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primaryColor"
+    android:paddingTop="35dp"
+    tools:context=".ListActivity">
+
+    <!-- Keresősáv és Szűrő -->
+    <LinearLayout
+        android:background="#474747"
+        android:id="@+id/searchContainer"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="7dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="3"
+            android:elevation="8dp"
+            android:iconifiedByDefault="false"
+            android:queryHint="Keresés..." />
+
+        <Spinner
+            android:id="@+id/spinnerFilter"
+            android:layout_width="1dp"
+            android:layout_height="60dp"
+            android:layout_weight="3"
+            android:elevation="10dp"
+            android:padding="15dp"
+            android:entries="@array/sorting_options"
+            android:minHeight="48dp"
+            android:prompt="@string/sort_by"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
+
+    <!-- RecyclerView -->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="Ingatlanok listája"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/list_item" />
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
