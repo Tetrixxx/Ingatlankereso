@@ -7,4 +7,13 @@
     <string name="email_c_m">Email cím</string>
     <string name="m_gse">Mégse</string>
     <string name="jelsz_jra">Jelszó újra</string>
+    <string name="property_image">Property Image</string>
+    <string name="property_details">Property Details</string>
+    <string name="bedrooms">Bedrooms</string>
+    <string name="bathrooms">Bathrooms</string>
+    <string name="square_footage">Square Footage</string>
+    <string name="square_footage_format">%.1f sqft</string>
+    <string name="no_items_available">Nincsenek elérhető ingatlanok</string>
+    <string name="empty_list_description">Üres lista</string>
+    <string name="property_list_description">Ingatlanok listája</string>
 </resources>

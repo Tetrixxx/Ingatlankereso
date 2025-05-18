@@ -13,6 +13,9 @@
         android:theme="@style/Theme.Ingatlan"
         tools:targetApi="31">
         <activity
+            android:name=".PropertyDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ListActivity"
             android:exported="false" />
         <activity
