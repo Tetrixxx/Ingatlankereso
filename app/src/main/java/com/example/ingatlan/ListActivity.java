@@ -2,6 +2,7 @@ package com.example.ingatlan;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SearchView;
@@ -72,8 +73,20 @@ public class ListActivity extends AppCompatActivity {
         adapter = new PropertyAdapter(options);
         recyclerView.setAdapter(adapter);
     }
+
     private void setupSearchAndFilter() {
         // Keresés kezelése
+        spinnerFilter.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // Hívjuk meg a performClick() metódust a kattintás érzetének biztosításához
+                v.performClick();
+                Log.d("SPINNER", "Spinner was clicked.");
+            }
+            // Tovább engedi az eseményt, így a normál Spinner működés is aktiválódik
+            return false;
+        });
+
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -97,6 +110,7 @@ public class ListActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+
     }
 
     private void updateQuery(String searchText) {
