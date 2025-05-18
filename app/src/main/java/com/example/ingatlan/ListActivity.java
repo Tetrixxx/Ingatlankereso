@@ -2,6 +2,11 @@ package com.example.ingatlan;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.SearchView;
+import android.widget.Spinner;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -13,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
@@ -26,29 +32,34 @@ public class ListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private PropertyAdapter adapter;  // Ez egy FirestoreRecyclerAdapter-et kiterjesztő adapter
 
+    private SearchView searchView;
+    private Spinner spinnerFilter;
+    private FirestoreRecyclerOptions<Property> currentOptions;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_list);
 
-        // Ablak-insetek beállítása a recyclerView-hoz
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.recyclerView), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        // Felhasználó ellenőrzése a Firebase Authentication-nel
-
-        // RecyclerView beállítása
+        // UI elemek inicializálása
+        searchView = findViewById(R.id.searchView);
+        spinnerFilter = findViewById(R.id.spinnerFilter);
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setupSearchAndFilter();
 
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("properties").get().addOnSuccessListener(querySnapshot -> {
+            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                Property property = doc.toObject(Property.class);
+                doc.getReference().update("searchTerms", property.generateSearchTerms());
+            }
+        });
 
         uploadSampleData();
         // Firestore lekérdezés létrehozása: pl. a "properties" gyűjteményből Budapest ingatlanjai, ár szerint növekvő sorrendben
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         Query query = db.collection("properties")
                 .orderBy("price", Query.Direction.ASCENDING);
 
@@ -61,6 +72,69 @@ public class ListActivity extends AppCompatActivity {
         adapter = new PropertyAdapter(options);
         recyclerView.setAdapter(adapter);
     }
+    private void setupSearchAndFilter() {
+        // Keresés kezelése
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                updateQuery(newText);
+                return true;
+            }
+        });
+
+        // Szűrő kezelése
+        spinnerFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                updateQuery(searchView.getQuery().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void updateQuery(String searchText) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Query query = db.collection("properties");
+
+        // Ha a keresőmező nem üres, lekérdezzük az adott prefix alapján
+        if (!searchText.isEmpty()) {
+            // A felhasználó által beírt keresőszöveget kisbetűssé alakítjuk
+            query = query.whereArrayContains("searchTerms", searchText.toLowerCase());
+        }
+
+        // Rendezés a Spinner kiválasztása alapján
+        switch (spinnerFilter.getSelectedItemPosition()) {
+            case 0:  // Ár növekvő
+                query = query.orderBy("price", Query.Direction.ASCENDING);
+                break;
+            case 1:  // Ár csökkenő
+                query = query.orderBy("price", Query.Direction.DESCENDING);
+                break;
+            case 2:  // Város szerint
+                query = query.orderBy("city");
+                break;
+        }
+
+        // Új lekérdezés beállítása az adapterhez
+        currentOptions = new FirestoreRecyclerOptions.Builder<Property>()
+                .setQuery(query, Property.class)
+                .build();
+
+        if (adapter != null) {
+            adapter.stopListening();
+        }
+        adapter = new PropertyAdapter(currentOptions);
+        recyclerView.setAdapter(adapter);
+        adapter.startListening();
+    }
+
 
     @Override
     protected void onStart() {
@@ -77,6 +151,7 @@ public class ListActivity extends AppCompatActivity {
             adapter.stopListening();   // Megállítja a snapshot figyelést, így erőforrásokat takarít meg
         }
     }
+
     private List<Property> properties = Arrays.asList(
             new Property("Belvárosi lakás", "Váci út 5.", "lakás", 65000000, "Budapest"),
             new Property("Kertvárosi ház", "Alkotmány utca 12.", "ház", 120000000, "Budapest"),
@@ -123,4 +198,5 @@ public class ListActivity extends AppCompatActivity {
                 .addOnFailureListener(e ->
                         Log.e("UPLOAD", "Hiba a kollekció ellenőrzésekor: " + e.getMessage()));
     }
+
 }

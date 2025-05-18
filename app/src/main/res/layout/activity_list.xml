@@ -8,35 +8,52 @@
     android:padding="@dimen/screen_margin"
     tools:context=".ListActivity">
 
-    <!-- Üres állapot megjelenítése -->
-    <TextView
-        android:id="@+id/emptyView"
-        android:layout_width="wrap_content"
+    <!-- Keresősáv és Szűrő -->
+    <LinearLayout
+        android:id="@+id/searchContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/no_items_available"
-        android:visibility="gone"
-        android:textSize="18sp"
-        android:textColor="?android:attr/textColorSecondary"
+        android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:text="Nincsenek elérhető ingatlanok"
-        android:contentDescription="@string/empty_list_description" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- RecyclerView frissítve -->
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="3"
+            android:elevation="8dp"
+            android:iconifiedByDefault="false"
+            android:queryHint="Keresés..." />
+
+        <Spinner
+            android:id="@+id/spinnerFilter"
+            android:layout_width="87dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:elevation="10dp"
+            android:entries="@array/sorting_options"
+            android:minHeight="48dp"
+            android:prompt="@string/sort_by"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
+
+    <!-- RecyclerView -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scrollbars="vertical"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Ingatlanok listája"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/list_item"
-        android:contentDescription="@string/property_list_description" />
+        tools:listitem="@layout/list_item" />
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

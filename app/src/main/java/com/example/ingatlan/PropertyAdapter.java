@@ -22,19 +22,18 @@ public class PropertyAdapter extends FirestoreRecyclerAdapter<Property, Property
 
     @Override
     protected void onBindViewHolder(@NonNull PropertyHolder holder, int position, @NonNull Property model) {
+        // Alapértelmezett értékek beállítása
         holder.textTitle.setText(model.getTitle());
         holder.textAddress.setText(model.getAddress());
         holder.textPrice.setText(String.valueOf(model.getPrice()));
         holder.textType.setText(model.getType());
+        holder.textCity.setText(model.getCity());
 
-        holder.itemView.setOnClickListener(v -> {
-            DocumentSnapshot document = getSnapshots().getSnapshot(position);
-            Property property = document.toObject(Property.class);
-
-            Intent intent = new Intent(v.getContext(), PropertyDetailActivity.class);
-            intent.putExtra("PROPERTY", property);
-            v.getContext().startActivity(intent);
-        });
+        // Accessibility tartalom leírások
+        holder.textTitle.setContentDescription("Ingatlan neve: " + model.getTitle());
+        holder.textPrice.setContentDescription("Ár: " + model.getPrice() + " Ft");
+        holder.textCity.setContentDescription("Város: " + model.getCity());
+        holder.textType.setContentDescription("Típus: " + model.getType());
     }
 
     @NonNull
@@ -54,12 +53,16 @@ public class PropertyAdapter extends FirestoreRecyclerAdapter<Property, Property
         TextView textPrice;
         TextView textType;
 
+        TextView textCity;
+
         public PropertyHolder(@NonNull View itemView) {
             super(itemView);
             textTitle = itemView.findViewById(R.id.textViewTitle);
             textAddress = itemView.findViewById(R.id.textViewAddress);
             textPrice = itemView.findViewById(R.id.textViewPrice);
             textType = itemView.findViewById(R.id.textViewType);
+            textCity = itemView.findViewById(R.id.textViewCity);
         }
     }
+
 }

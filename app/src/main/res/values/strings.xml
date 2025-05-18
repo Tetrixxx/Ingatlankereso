@@ -16,4 +16,10 @@
     <string name="no_items_available">Nincsenek elérhető ingatlanok</string>
     <string name="empty_list_description">Üres lista</string>
     <string name="property_list_description">Ingatlanok listája</string>
+    <string name="sort_by">Rendezés</string>
+    <string-array name="sorting_options">
+        <item>Ár szerint növekvő</item>
+        <item>Ár szerint csökkenő</item>
+        <item>Város szerint</item>
+    </string-array>
 </resources>
