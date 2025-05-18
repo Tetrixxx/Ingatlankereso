@@ -5,11 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/primaryColor"
     android:paddingTop="35dp"
     tools:context=".ListActivity">
 
     <!-- Keresősáv és Szűrő -->
     <LinearLayout
+        android:background="#474747"
         android:id="@+id/searchContainer"
         android:layout_width="match_parent"
         android:layout_height="55dp"
