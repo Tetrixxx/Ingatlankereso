@@ -1,5 +1,8 @@
 package com.example.ingatlan;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -7,17 +10,19 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -28,8 +33,10 @@ import java.util.List;
 
 public class ListActivity extends AppCompatActivity {
 
-    private FirebaseUser user;
+    private static final int LOCATION_REQUEST_CODE = 1000;
     private static final String LOG_TAG = ListActivity.class.getName();
+
+    private FirebaseUser user;
     private RecyclerView recyclerView;
     private PropertyAdapter adapter;  // Ez egy FirestoreRecyclerAdapter-et kiterjesztő adapter
 
@@ -37,6 +44,11 @@ public class ListActivity extends AppCompatActivity {
     private Spinner spinnerFilter;
     private FirestoreRecyclerOptions<Property> currentOptions;
 
+    // Helymeghatározáshoz szükséges változók
+    private FusedLocationProviderClient fusedLocationClient;
+    private Location currentLocation;
+
+    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +61,11 @@ public class ListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         setupSearchAndFilter();
 
+        // Helymeghatározás inicializálása
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        checkLocationPermissionAndFetch();
 
+        // Ide jönnek az adatok frissítése és feltöltése Firebase-be
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("properties").get().addOnSuccessListener(querySnapshot -> {
             for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
@@ -59,12 +75,12 @@ public class ListActivity extends AppCompatActivity {
         });
 
         uploadSampleData();
-        // Firestore lekérdezés létrehozása: pl. a "properties" gyűjteményből Budapest ingatlanjai, ár szerint növekvő sorrendben
-        db = FirebaseFirestore.getInstance();
+
+        // Firestore lekérdezés: pl. a properties kollekció, ár szerint növekvő sorrend
         Query query = db.collection("properties")
                 .orderBy("price", Query.Direction.ASCENDING);
 
-        // FirestoreRecyclerOptions felépítése a modell osztályoddal (például Property)
+        // FirestoreRecyclerOptions felépítése a modellel (Property)
         FirestoreRecyclerOptions<Property> options = new FirestoreRecyclerOptions.Builder<Property>()
                 .setQuery(query, Property.class)
                 .build();
@@ -74,25 +90,69 @@ public class ListActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
+    // Ellenőrzi, hogy van-e location engedély, ha nem, akkor kéri
+    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    private void checkLocationPermissionAndFetch() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_REQUEST_CODE);
+        } else {
+            fetchUserLocation();
+        }
+    }
+
+    // Lekéri a felhasználó utolsó ismert helyét
+    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    private void fetchUserLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return; // Mindig ellenőrizd újra a jogosultságot!
+        }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+                    if (location != null) {
+                        currentLocation = location;
+                        Log.d(LOG_TAG, "User location: " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
+                        // Itt később használhatod az aktuális helyet, pl. lekérdezés szűrésére
+                    } else {
+                        Log.d(LOG_TAG, "Nem sikerült lekérni a helyet.");
+                    }
+                });
+    }
+
+    // A location engedély eredményének kezelése
+    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchUserLocation();
+            } else {
+                Toast.makeText(this, "Helymeghatározás engedélye szükséges a közeli ingatlanok megjelenítéséhez.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private void setupSearchAndFilter() {
-        // Keresés kezelése
+        // Spinner érintés kezelése
         spinnerFilter.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                // Hívjuk meg a performClick() metódust a kattintás érzetének biztosításához
                 v.performClick();
-                Log.d("SPINNER", "Spinner was clicked.");
+                Log.d("SPINNER", "Spinner meg lett koppintva.");
             }
-            // Tovább engedi az eseményt, így a normál Spinner működés is aktiválódik
             return false;
         });
 
-
+        // Keresőmező eseménykezelője
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
             }
-
             @Override
             public boolean onQueryTextChange(String newText) {
                 updateQuery(newText);
@@ -100,26 +160,23 @@ public class ListActivity extends AppCompatActivity {
             }
         });
 
-        // Szűrő kezelése
+        // Szűrő beállításainak kezelése
         spinnerFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 updateQuery(searchView.getQuery().toString());
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
     }
 
     private void updateQuery(String searchText) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Query query = db.collection("properties");
 
-        // Ha a keresőmező nem üres, lekérdezzük az adott prefix alapján
+        // Ha a keresőmező nem üres, akkor szűrés a searchTerms mező alapján
         if (!searchText.isEmpty()) {
-            // A felhasználó által beírt keresőszöveget kisbetűssé alakítjuk
             query = query.whereArrayContains("searchTerms", searchText.toLowerCase());
         }
 
@@ -136,7 +193,7 @@ public class ListActivity extends AppCompatActivity {
                 break;
         }
 
-        // Új lekérdezés beállítása az adapterhez
+        // Új FirestoreRecyclerOptions beállítása az adapterhez
         currentOptions = new FirestoreRecyclerOptions.Builder<Property>()
                 .setQuery(query, Property.class)
                 .build();
@@ -149,20 +206,19 @@ public class ListActivity extends AppCompatActivity {
         adapter.startListening();
     }
 
-
     @Override
     protected void onStart() {
         super.onStart();
-        if(adapter != null){
-            adapter.startListening();  // Elindítja a snapshot figyelést
+        if (adapter != null) {
+            adapter.startListening();
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if(adapter != null){
-            adapter.stopListening();   // Megállítja a snapshot figyelést, így erőforrásokat takarít meg
+        if (adapter != null) {
+            adapter.stopListening();
             adapter = new PropertyAdapter(currentOptions);
             recyclerView.setAdapter(adapter);
             adapter.startListening();
@@ -191,14 +247,14 @@ public class ListActivity extends AppCompatActivity {
             new Property("Felújított lakópark", "Szent István körút 8.", "lakás", 58000000, "Budapest"),
             new Property("Nyaraló a Balatonnál", "Füredi út 55.", "ház", 95000000, "Siófok")
     );
+
     private void uploadSampleData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // 1. Ellenőrizzük, van-e már dokumentum a "properties" kollekcióban
+        // Ellenőrizzük, van-e már dokumentum a "properties" kollekcióban
         db.collection("properties").limit(1).get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
-
                         for (Property property : properties) {
                             db.collection("properties")
                                     .add(property)
@@ -215,5 +271,4 @@ public class ListActivity extends AppCompatActivity {
                 .addOnFailureListener(e ->
                         Log.e("UPLOAD", "Hiba a kollekció ellenőrzésekor: " + e.getMessage()));
     }
-
 }
